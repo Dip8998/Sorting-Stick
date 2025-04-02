@@ -135,51 +135,50 @@ namespace Gameplay
 			number_of_array_access = 0;
 		}
 
+
 		void StickCollectionController::processBubbleSort()
 		{
-			//ServiceLocator::getInstance()->getSoundService()->playSound(Sound::SoundType::COMPARE_SFX);
-			Sound::SoundService* sound = Global::ServiceLocator::getInstance()->getSoundService();
 
-			for (int j = 0; j < sticks.size(); j++) {   // Loop through the sticks array
-				if (sort_state == SortState::NOT_SORTING) { break; }   // Check if sorting has stopped or been interrupted
+			SoundService* sound = Global::ServiceLocator::getInstance()->getSoundService();
+			for (int j = 0; j < sticks.size(); j++)
+			{
+				if (sort_state == SortState::NOT_SORTING) { break; }
 
 				bool swapped = false;  // To track if a swap was made
 
-				for (int i = 1; i < sticks.size() - j; i++) {    // Loop through the array, reducing the range each pass
-					if (sort_state == SortState::NOT_SORTING) { break; }      // Check if sorting has stopped or been interrupted
+				for (int i = 1; i < sticks.size() - j; i++)  // Reduce the range each pass
+				{
 
-					// Increment the number of array accesses and comparisons
+					if (sort_state == SortState::NOT_SORTING) { break; }
+
 					number_of_array_access += 2;
 					number_of_comparisons++;
+					sound->playSound(SoundType::COMPARE_SFX);
 
-					sound->playSound(Sound::SoundType::COMPARE_SFX);      // Play the compare sound effect
-
-					// Set the current sticks to the processing color
 					sticks[i - 1]->stick_view->setFillColor(collection_model->processing_element_color);
 					sticks[i]->stick_view->setFillColor(collection_model->processing_element_color);
 
-					if (sticks[i - 1]->data > sticks[i]->data) {      // Check if the current stick is greater than the next stick
-						// Swap the sticks if necessary
+					if (sticks[i - 1]->data > sticks[i]->data) {
 						std::swap(sticks[i - 1], sticks[i]);
 						swapped = true;  // Set swapped to true if there was a swap
 					}
-
 					std::this_thread::sleep_for(std::chrono::milliseconds(current_operation_delay));
 
-					// Reset the stick colors
 					sticks[i - 1]->stick_view->setFillColor(collection_model->element_color);
 					sticks[i]->stick_view->setFillColor(collection_model->element_color);
-
 					updateStickPosition();
 				}
-
-				if (sticks.size() - j - 1 >= 0) {    // Set the last sorted stick to the placement position color
+				// Set the last sorted stick to green
+				if (sticks.size() - j - 1 >= 0) {
 					sticks[sticks.size() - j - 1]->stick_view->setFillColor(collection_model->placement_position_element_color);
 				}
-
-				if (!swapped) { break; }    // If no swaps were made so the input was already sorted
-				setCompletedColor();
+				// If no swaps were made, the array is already sorted
+				if (!swapped)
+					break;
 			}
+
+			setCompletedColor();
+
 		}
 
 		void StickCollectionController::processInsertionSort()
