@@ -59,6 +59,7 @@ namespace Gameplay
             void render();
 
             void processBubbleSort();
+            void processInsertionSort();    
             void setCompletedColor();
 
             void reset();

@@ -182,6 +182,57 @@ namespace Gameplay
 			}
 		}
 
+		void StickCollectionController::processInsertionSort()
+		{
+			SoundService* sound = Global::ServiceLocator::getInstance()->getSoundService();
+
+			for (int i = 1; i < sticks.size(); ++i)
+			{
+
+				if (sort_state == SortState::NOT_SORTING) { break; }
+
+				int j = i - 1;
+				Stick* key = sticks[i];
+				number_of_array_access++; // Access for key stick
+
+
+				key->stick_view->setFillColor(collection_model->processing_element_color); // Current key is red
+
+				std::this_thread::sleep_for(std::chrono::milliseconds(current_operation_delay));
+
+				while (j >= 0 && sticks[j]->data > key->data)
+				{
+
+					if (sort_state == SortState::NOT_SORTING) { break; }
+
+					number_of_comparisons++;
+					number_of_array_access++;
+
+					sticks[j + 1] = sticks[j];
+					number_of_array_access++; // Access for assigning sticks[j] to sticks[j + 1]
+					sticks[j + 1]->stick_view->setFillColor(collection_model->processing_element_color); // Mark as being compared
+					j--;
+					sound->playSound(SoundType::COMPARE_SFX);
+					updateStickPosition(); // Visual update
+
+					std::this_thread::sleep_for(std::chrono::milliseconds(current_operation_delay));
+
+					sticks[j + 2]->stick_view->setFillColor(collection_model->selected_element_color); // Mark as being compared
+
+				}
+
+				sticks[j + 1] = key;
+				number_of_array_access++;
+				sticks[j + 1]->stick_view->setFillColor(collection_model->temporary_processing_color); // Placed key is green indicating it's sorted
+				sound->playSound(SoundType::COMPARE_SFX);
+				updateStickPosition(); // Final visual update for this iteration
+				std::this_thread::sleep_for(std::chrono::milliseconds(current_operation_delay));
+				sticks[j + 1]->stick_view->setFillColor(collection_model->selected_element_color); // Placed key is green indicating it's sorted
+			}
+			setCompletedColor();
+		}
+
+
 		void StickCollectionController::setCompletedColor()
 		{
 			for (int k = 0; k < sticks.size(); k++) {
@@ -195,9 +246,9 @@ namespace Gameplay
 				sticks[i]->stick_view->setFillColor(collection_model->placement_position_element_color);
 				std::this_thread::sleep_for(std::chrono::milliseconds(color_delay));
 			}
-			// Play scream sound if sorting is still in progress
+
 			if (sort_state == SortState::SORTING) {
-				//sound->playSound(SoundType::SCREAM); - not yet present 
+				sound->playSound(SoundType::SCREAM);  
 			}
 		}
 
@@ -225,6 +276,10 @@ namespace Gameplay
 				//sort_state = SortState::SORTING; - not needed as function begins any sorting
 				time_complexity = "O(n^2)";
 				sort_thread = std::thread(&StickCollectionController::processBubbleSort, this);
+				break;
+			case Gameplay::Collection::SortType::INSERTION_SORT:
+				time_complexity = "O(n^2)";
+				sort_thread = std::thread(&StickCollectionController::processInsertionSort, this);
 				break;
 			}
 		}
