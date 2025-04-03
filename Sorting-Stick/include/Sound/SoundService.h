@@ -20,6 +20,8 @@ namespace Sound
 		sf::Sound sound_effect;
 		sf::SoundBuffer buffer_button_click;
 		sf::SoundBuffer buffer_compare_sfx;
+		sf::SoundBuffer buffer_scream_sfx;
+
 
 		void loadBackgroundMusicFromFile();
 		void loadSoundFromFile();
