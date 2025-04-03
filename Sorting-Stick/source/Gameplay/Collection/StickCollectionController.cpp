@@ -192,7 +192,68 @@ namespace Gameplay
 
 		void StickCollectionController::processMergeSort()
 		{
+			mergeSort(0, sticks.size() - 1);
+			setCompletedColor();
+		}
 
+		void StickCollectionController::mergeSort(int left, int right)
+		{
+			if (left >= right) return;
+			int mid = left + (right - left) / 2;
+
+			mergeSort(left, mid);
+			mergeSort(mid + 1, right);
+			merge(left, mid, right);
+		}
+
+		void StickCollectionController::merge(int left, int mid, int right)
+		{
+			SoundService* sound = Global::ServiceLocator::getInstance()->getSoundService();
+
+			std::vector<Stick*> temp(right - left + 1);
+			int i = left, j = mid + 1, k = 0;
+
+			for (int index = left; index <= right; ++index) {
+				temp[k++] = sticks[index];
+				sticks[index]->stick_view->setFillColor(collection_model->temporary_processing_color);
+				updateStickPosition();
+			}
+
+			i = 0;  
+			j = mid - left + 1;  
+			k = left;  
+
+			while (i < mid - left + 1 && j < temp.size()) {
+				if (temp[i]->data <= temp[j]->data) {
+					sticks[k] = temp[i++];
+				}
+				else {
+					sticks[k] = temp[j++];
+				}
+
+				sound->playSound(SoundType::COMPARE_SFX);
+				sticks[k]->stick_view->setFillColor(collection_model->processing_element_color);
+				updateStickPosition();  
+				std::this_thread::sleep_for(std::chrono::milliseconds(current_operation_delay));
+
+				k++;
+			}
+
+			while (i < mid - left + 1 || j < temp.size()) {
+				if (i < mid - left + 1) {
+					sticks[k] = temp[i++];
+				}
+				else {
+					sticks[k] = temp[j++];
+				}
+
+				sound->playSound(SoundType::COMPARE_SFX);
+				sticks[k]->stick_view->setFillColor(collection_model->processing_element_color);
+				updateStickPosition(); 
+				std::this_thread::sleep_for(std::chrono::milliseconds(current_operation_delay));
+
+				k++;
+			}
 		}
 
 		void StickCollectionController::processBubbleSort()
