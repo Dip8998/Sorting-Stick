@@ -51,6 +51,9 @@ namespace Gameplay
             void merge(int left, int mid, int right);
             int partition(int left, int right);
             void quickSort(int left, int right);
+            void radixSort();
+            void updateStickPosition(int i);
+            void countSort(int exponent);
             void processSortThreadState();
 
             bool isCollectionSorted();
@@ -69,6 +72,7 @@ namespace Gameplay
             void processSelectionSort();
             void processInPlaceMergeSort(int left, int right);
             void processQuickSort();
+            void processRadixSort();
             void setCompletedColor();
 
             void reset();
